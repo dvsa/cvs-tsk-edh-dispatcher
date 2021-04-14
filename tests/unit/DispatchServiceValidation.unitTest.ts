@@ -15,7 +15,7 @@ describe('isValidMessageBody', () => {
   const target: Target = {
     queue: '',
     dlQueue: '',
-    swaggerSpecFile: 'API_Vehicle_Test_Results_CVS->EDH_v1.yaml',
+    swaggerSpecFile: 'API_Vehicle_Test_Results_CVS_EDH_v1.yaml',
     schemaItem: 'completeTestResults',
   };
   const invalidRecord = { eventType: 'invalid', streamEvent: {} } as unknown as TargetRecord;

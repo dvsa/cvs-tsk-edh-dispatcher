@@ -30,9 +30,18 @@ class Configuration {
       BRANCH: this.env === 'local' ? this.env : env.BRANCH,
     };
     console.log("configuration loaded. BRANCH = ", env.BRANCH);
+
+    const template = readFileSync(configPath, 'utf-8');
+    console.log('YML template before replacements', template);
+
+    const ymlRendered = render(template, data);
+    console.log('YML template after replacements', ymlRendered);
+
     this.config = load(
-      render(readFileSync(configPath, 'utf-8'), data),
+      ymlRendered,
     ) as Config;
+
+    console.log("config after js-yaml", this.config);
   }
 
   /**
@@ -44,6 +53,7 @@ class Configuration {
       this.instance = new Configuration(path.resolve(__dirname, '../config/config.yml'));
     }
 
+    console.log('Configuration::getInstance called, retrieving config', Configuration.instance)
     return Configuration.instance;
   }
 

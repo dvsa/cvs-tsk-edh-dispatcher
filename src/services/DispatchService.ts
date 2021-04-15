@@ -42,13 +42,24 @@ class DispatchService {
       return;
     }
 
-    if (!dynamoEvent.dynamodb?.NewImage) {
-      this.logger.error(ERROR.NO_NEW_IMAGE);
-      await this.sendRecordToDLQ(record.body, target);
-      return;
+    let image;
+    if (dynamoEvent.eventName === 'REMOVE') {
+      if (!dynamoEvent.dynamodb?.OldImage) {
+        this.logger.error(ERROR.NO_OLD_IMAGE);
+        await this.sendRecordToDLQ(record.body, target);
+        return;
+      }
+      image = dynamoEvent.dynamodb.OldImage;
+    } else {
+      if (!dynamoEvent.dynamodb?.NewImage) {
+        this.logger.error(ERROR.NO_NEW_IMAGE);
+        await this.sendRecordToDLQ(record.body, target);
+        return;
+      }
+      image = dynamoEvent.dynamodb.NewImage;
     }
 
-    if (!await this.isValidMessageBody(dynamoEvent.dynamodb.NewImage, target)) {
+    if (!await this.isValidMessageBody(image, target)) {
       this.logger.error("not a valid message body");
       this.logger.error(ERROR.FAILED_VALIDATION_SENDING_TO_DLQ);
       await this.sendRecordToDLQ(record.body, target);

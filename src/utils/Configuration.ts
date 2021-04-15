@@ -6,6 +6,7 @@ import { env } from 'process';
 import { render } from 'template-file';
 import { ERROR } from '../models/enums';
 import { Config, SecretConfig, TargetConfig } from '../models/interfaces';
+import path from "path";
 
 /**
  * Helper class for retrieving project configuration
@@ -39,7 +40,7 @@ class Configuration {
    */
   public static getInstance(): Configuration {
     if (!this.instance) {
-      this.instance = new Configuration('src/config/config.yml');
+      this.instance = new Configuration(path.resolve(__dirname, '../config/config.yml'));
     }
 
     return Configuration.instance;

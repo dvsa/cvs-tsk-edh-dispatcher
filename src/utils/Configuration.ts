@@ -29,6 +29,7 @@ class Configuration {
     const data = {
       BRANCH: this.env === 'local' ? this.env : env.BRANCH,
     };
+    console.log("configuration loaded. BRANCH = ", env.BRANCH);
     this.config = load(
       render(readFileSync(configPath, 'utf-8'), data),
     ) as Config;

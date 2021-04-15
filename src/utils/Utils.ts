@@ -10,7 +10,7 @@ export const getTargetFromSourceARN = (arn: string): Target => {
   const targets: TargetConfig = Configuration.getInstance().getTargets();
   console.log("Possible targets", targets);
   const validTargets = Object.keys(targets).filter((k) => arn.includes(k));
-  console.log("Valid targets", targets);
+  console.log("Valid targets", validTargets);
   if (validTargets.length !== 1) {
     throw new Error(ERROR.NO_UNIQUE_TARGET);
   }

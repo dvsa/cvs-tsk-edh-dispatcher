@@ -135,7 +135,7 @@ describe('Dispatch Service', () => {
         eventName: 'REMOVE',
         dynamodb: {
           Keys: { testResultId: { S: '123' } },
-          NewImage: {}
+          OldImage: {}
         },
       };
       const record: SQSRecord = {

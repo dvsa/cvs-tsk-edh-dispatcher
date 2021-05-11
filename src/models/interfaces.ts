@@ -7,10 +7,19 @@ interface SQSConfig {
   queueName: string[];
 }
 
+interface S3Config {
+  params: {
+    [param: string]: string;
+  };
+}
+
 export interface Config {
   sqs: {
     local: SQSConfig;
     remote: SQSConfig;
+  };
+  s3: {
+    remote: S3Config;
   };
   targets: TargetConfig;
 }

@@ -3,6 +3,8 @@ import { SQS } from 'aws-sdk';
 import { Logger } from 'tslog';
 import { DispatchService } from '../services/DispatchService';
 import { SQService } from '../services/SQService';
+import { Configuration } from '../utils/Configuration';
+import { SqsService } from '../utils/sqs-huge-msg';
 
 const testing = process.env.NODE_ENV === 'test';
 /**
@@ -24,10 +26,31 @@ const edhDispatcher: SQSHandler = async (event: SQSEvent): Promise<void> => {
   }
 
   // Instantiate the Simple Queue Service
-  const dispatchService: DispatchService = new DispatchService(new SQService(new SQS(), logger.getChildLogger({ name: 'SQService' })), logger.getChildLogger({ name: 'DispatchService' }));
+  const region = process.env.AWS_REGION;
+  const config = Configuration.getInstance().getConfig();
+
+  if (!region) {
+    console.error('AWS_REGION envvar not available');
+    return;
+  }
+  const sqsHugeMessage = new SqsService({
+    region,
+    queueName: config.sqs.remote.queueName[0],
+    s3EndpointUrl: config.s3.remote.params.endpoint,
+    s3Bucket: 'BUCKET_NAME',
+  });
+
+  const dispatchService: DispatchService = new DispatchService(
+    new SQService(
+      sqsHugeMessage,
+      logger.getChildLogger({ name: 'SQService' }),
+    ),
+    logger.getChildLogger({ name: 'DispatchService' }),
+  );
   const sentMessagePromises: Array<Promise<void>> = [];
   logger.debug('Records: ', records);
 
+  // Handle records here
   records.forEach((record) => {
     logger.debug('Record: ', record);
     const call = dispatchService.processSQSRecord(record);

@@ -37,7 +37,7 @@ const edhDispatcher: SQSHandler = async (event: SQSEvent): Promise<void> => {
     region,
     queueName: config.sqs.remote.queueName[0],
     s3EndpointUrl: config.s3.remote.params.endpoint,
-    s3Bucket: 'BUCKET_NAME',
+    s3Bucket: config.s3.remote.params.bucket,
   });
 
   const dispatchService: DispatchService = new DispatchService(

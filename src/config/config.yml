@@ -15,6 +15,7 @@ s3:
   remote:
     params:
       endpoint: https://s3.${AWS_REGION}.amazonaws.com
+      bucket: cvs-sqs-queues-${BRANCH}
 
 targets:
   test-results:

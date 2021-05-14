@@ -1,7 +1,8 @@
 import * as AWS from 'aws-sdk';
-import { MessageBodyAttributeMap } from 'aws-sdk/clients/sqs';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuid } from 'uuid';
+import AWSXRay from 'aws-xray-sdk';
+import { MessageBodyAttributeMap } from 'aws-sdk/clients/sqs';
 
 export interface SqsServiceOptions {
   endpoint?: string;
@@ -28,6 +29,8 @@ export class SqsService {
 
   private s3Bucket: string;
 
+  private sqsInstance: AWS.SQS|undefined;
+
   constructor(options: SqsServiceOptions) {
     this.endpoint = options.endpoint;
     this.region = options.region;
@@ -38,6 +41,10 @@ export class SqsService {
   }
 
   private getInstance(): AWS.SQS {
+    if (this.sqsInstance) {
+      return this.sqsInstance;
+    }
+
     const sqsConfig = {
       region: this.region,
       endpoint: this.endpoint,
@@ -45,7 +52,10 @@ export class SqsService {
     if (!this.endpoint) {
       delete sqsConfig.endpoint;
     }
-    return new AWS.SQS(sqsConfig);
+
+    this.sqsInstance = AWSXRay.captureAWSClient(new AWS.SQS(sqsConfig));
+
+    return this.sqsInstance;
   }
 
   private getInstanceS3(): AWS.S3 {
@@ -92,10 +102,8 @@ export class SqsService {
     if (msgSize < this.maxMessageSize) {
       const messageConfig = {
         QueueUrl: queueUrl,
-        MessageBody: JSON.stringify({
-          message: body,
-        }),
-        messageAttributes,
+        MessageBody: body,
+        MessageAttributes: messageAttributes,
       };
 
       return this.getInstance().sendMessage(messageConfig).promise();
@@ -106,9 +114,7 @@ export class SqsService {
 
     const responseBucket = await this.getInstanceS3().upload({
       Bucket: this.s3Bucket,
-      Body: JSON.stringify({
-        message: body,
-      }),
+      Body: body,
       Key: payloadId,
     }).promise();
 
@@ -121,7 +127,7 @@ export class SqsService {
           Location: responseBucket.Location,
         },
       }),
-      messageAttributes,
+      MessageAttributes: messageAttributes,
     };
 
     return this.getInstance().sendMessage(messageConfig).promise();

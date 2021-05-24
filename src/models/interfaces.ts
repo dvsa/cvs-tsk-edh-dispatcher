@@ -9,7 +9,8 @@ interface SQSConfig {
 
 interface S3Config {
   params: {
-    [param: string]: string;
+    endpoint: string;
+    bucket: string;
   };
 }
 
@@ -19,6 +20,7 @@ export interface Config {
     remote: SQSConfig;
   };
   s3: {
+    local: S3Config;
     remote: S3Config;
   };
   targets: TargetConfig;
